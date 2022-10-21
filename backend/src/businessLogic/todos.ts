@@ -5,8 +5,14 @@ import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import * as uuid from 'uuid';
 
 
+
 const todoTable = process.env.TODOS_TABLE
+const uploadUrlExpiration = process.env.SIGNED_URL_EXPIRATION
+const bucketName = process.env.ATTACHMENT_S3_BUCKET
 const docClient = new AWS.DynamoDB.DocumentClient();
+const s3 = new AWS.S3({
+    signatureVersion: 'v4'
+});
 
 export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
 
@@ -36,7 +42,7 @@ export async function createTodo(request: CreateTodoRequest, userId: string): Pr
         dueDate: request.dueDate,
         done: false,
         userId: userId,
-        attachmentUrl: "http://example.com/image.png"
+        attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${itemId}`
     }
 
     await docClient.put({
@@ -53,18 +59,14 @@ export async function updateTodo(request: UpdateTodoRequest, userId: string, tod
     const result = await docClient.get({
         TableName: todoTable,
         Key: {
+            userId: userId,
             todoId: todoId
-        }
+        },
+
     }).promise()
 
     if(!result.Item) {
         throw Error('Item does not exist')
-    }
-
-    const todoItem = result.Item as TodoItem
-
-    if(todoItem.userId != userId) {
-        throw Error("Not authorized to access object")
     }
 
         await docClient.update({
@@ -108,18 +110,13 @@ export async function deleteTodo(userId: string, todoId: string) {
     const result = await docClient.get({
         TableName: todoTable,
         Key: {
+            userId: userId,
             todoId: todoId
         }
     }).promise()
 
     if(!result.Item) {
         throw Error('Item does not exist')
-    }
-
-    const todoItem = result.Item as TodoItem
-
-    if(todoItem.userId != userId) {
-        throw Error("Not authorized to delete object")
     }
 
     docClient.delete({
@@ -129,4 +126,26 @@ export async function deleteTodo(userId: string, todoId: string) {
         }
     }).promise
 
+}
+
+
+export async function createAttachmentPresignedUrl(todoId: string, userId: string): Promise<string> {
+
+    const result = await docClient.get({
+        TableName: todoTable,
+        Key: {
+            userId: userId,
+            todoId: todoId
+        }
+    }).promise()
+
+    if(!result.Item) {
+        throw Error('Item does not exist')
+    }
+
+    return s3.getSignedUrl('putObject', {
+        Bucket: bucketName,
+        Key: todoId,
+        Expires: uploadUrlExpiration
+      })
 }

@@ -24,7 +24,7 @@ export const handler = middy(
     }
     catch(err) {
       return {
-        statusCode: 403,
+        statusCode: 404,
         body: JSON.stringify({
           'errorMessage': err
         })

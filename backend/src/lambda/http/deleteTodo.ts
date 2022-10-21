@@ -13,7 +13,6 @@ export const handler = middy(
     const userId = getUserId(event)
 
     try {
-
       await deleteTodo(userId, todoId)
       return {
         statusCode: 200,
@@ -22,7 +21,7 @@ export const handler = middy(
     }
     catch (err) {
       return {
-        statusCode: 400,
+        statusCode: 404,
         body: JSON.stringify({
           'message': err
         })
