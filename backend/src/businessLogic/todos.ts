@@ -47,20 +47,26 @@ export async function createTodo(request: CreateTodoRequest, userId: string): Pr
     return todoItem;
 }
 
-export async function UpdateTodo(request: UpdateTodoRequest, userId: string, todoId: string) {
+export async function updateTodo(request: UpdateTodoRequest, userId: string, todoId: string) {
 
-    const itemCreatedAt = new Date().toISOString();
-    const itemId = uuid.v4();
 
-    const todoItem = {
-        todoId: itemId,
-        name: request.name,
-        createdAt: itemCreatedAt,
-        dueDate: request.dueDate,
-        done: false,
-        userId: userId,
-        attachmentUrl: "http://example.com/image.png"
+    const result = await docClient.get({
+        TableName: todoTable,
+        Key: {
+            todoId: todoId
+        }
+    }).promise()
+
+    if(!result.Item) {
+        throw Error('Item does not exist')
     }
+
+    const todoItem = result.Item as TodoItem
+
+    if(todoItem.userId != userId) {
+        throw Error("Not authorized to access object")
+    }
+
         await docClient.update({
             TableName: todoTable,
             Key: {
@@ -93,5 +99,34 @@ export async function UpdateTodo(request: UpdateTodoRequest, userId: string, tod
                 ':dueDate': request.dueDate
             }
         }).promise()
+
+}
+
+export async function deleteTodo(userId: string, todoId: string) {
+
+
+    const result = await docClient.get({
+        TableName: todoTable,
+        Key: {
+            todoId: todoId
+        }
+    }).promise()
+
+    if(!result.Item) {
+        throw Error('Item does not exist')
+    }
+
+    const todoItem = result.Item as TodoItem
+
+    if(todoItem.userId != userId) {
+        throw Error("Not authorized to delete object")
+    }
+
+    docClient.delete({
+        TableName: todoTable,
+        Key: {
+            todoId: todoId
+        }
+    }).promise
 
 }
