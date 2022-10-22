@@ -7,7 +7,7 @@ import * as uuid from 'uuid';
 
 
 const todoTable = process.env.TODOS_TABLE
-const uploadUrlExpiration = process.env.SIGNED_URL_EXPIRATION
+const uploadUrlExpiration: number = parseInt(process.env.SIGNED_URL_EXPIRATION)
 const bucketName = process.env.ATTACHMENT_S3_BUCKET
 const docClient = new AWS.DynamoDB.DocumentClient();
 const s3 = new AWS.S3({
