@@ -113,7 +113,7 @@ export async function deleteTodo(userId: string, todoId: string) {
             userId: userId,
             todoId: todoId
         }
-    }).promise
+    }).promise()
 
 }
 
