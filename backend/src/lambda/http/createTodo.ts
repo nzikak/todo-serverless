@@ -11,11 +11,26 @@ export const handler = middy(
     const userId = getUserId(event);
     const newTodo: CreateTodoRequest = JSON.parse(event.body)
     // TODO: Implement creating a new TODO item
-    const todoItem = await createTodo(newTodo, userId);
+    try {
+      const todoItem = await createTodo(newTodo, userId);
 
     return {
       statusCode: 201,
-      body: JSON.stringify(todoItem)
+      body: JSON.stringify({
+        "item": todoItem
+      })
+    }
+    }
+    catch(err) {
+      console.log(`Create error is ${JSON.stringify(err)}`)
+      return {
+        statusCode: 401,
+        body: JSON.stringify(
+          {
+            "errorMessage": err
+          }
+        )
+      }
     }
   }
 )
