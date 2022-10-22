@@ -1,5 +1,4 @@
 # TODO: Change the name of the org 
-org: sudkul
 app: serverless-todo-app
 service: serverless-todo-app
 
@@ -166,14 +165,6 @@ resources:
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
-          - AttributeName: name
-            AttributeType: S
-          - AttributeName: dueDate
-            AttributeType: S
-          - AttributeName: attachmentUrl
-            AttributeType: S
-          - AttributeName: done
-            AttributeType: B
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
@@ -188,6 +179,8 @@ resources:
                 KeyType: HASH
               - AttributeName: createdAt
                 KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
 
     # TODO: Complete the bucket properties below. 
     # Do not forget to add the CorsConfiguration propoerty

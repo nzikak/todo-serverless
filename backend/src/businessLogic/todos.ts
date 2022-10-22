@@ -21,7 +21,7 @@ export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
         TableName: todoTable,
         KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
-            ':userid': userId
+            ':userId': userId
         }
     }).promise()
 
@@ -65,6 +65,8 @@ export async function updateTodo(request: UpdateTodoRequest, userId: string, tod
 
     }).promise()
 
+    console.log(`Result is ${JSON.stringify(result.Item)}`)
+
     if(!result.Item) {
         throw Error('Item does not exist')
     }
@@ -72,35 +74,21 @@ export async function updateTodo(request: UpdateTodoRequest, userId: string, tod
         await docClient.update({
             TableName: todoTable,
             Key: {
+                userId: userId,
                 todoId: todoId
             },
-            UpdateExpression: 'SET done = :done',
-            ExpressionAttributeValues: {
-                ':done': request.done
-            }
-        }).promise()
-
-        await docClient.update({
-            TableName: todoTable,
-            Key: {
-                todoId: todoId
+            UpdateExpression: 'SET done = :done, #title = :name, dueDate = :dueDate',
+            ExpressionAttributeNames: {
+                '#title': 'name'
             },
-            UpdateExpression: 'SET name = :name',
             ExpressionAttributeValues: {
-                ':name': request.name
-            }
-        }).promise()
-
-        await docClient.update({
-            TableName: todoTable,
-            Key: {
-                todoId: todoId
-            },
-            UpdateExpression: 'SET dueDate = :dueDate',
-            ExpressionAttributeValues: {
+                ':done': request.done,
+                ':name': request.name,
                 ':dueDate': request.dueDate
             }
         }).promise()
+
+        console.log("Todo updated")
 
 }
 
@@ -122,6 +110,7 @@ export async function deleteTodo(userId: string, todoId: string) {
     docClient.delete({
         TableName: todoTable,
         Key: {
+            userId: userId,
             todoId: todoId
         }
     }).promise
