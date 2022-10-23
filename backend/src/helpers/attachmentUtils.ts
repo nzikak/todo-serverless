@@ -1,9 +1,11 @@
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { createLogger } from '../utils/logger'
 
 const AWSXRay = require('aws-xray-sdk')
 
 const XAWS = AWSXRay.captureAWS(AWS)
+const logger = createLogger('AttachmentUtils')
 
 // TODO: Implement the fileStorage logic
 export class AttachmentUtils {
@@ -21,6 +23,8 @@ export class AttachmentUtils {
 
     async createAttachmentPresignedUrl(todoId: string, userId: string): Promise<string> {
 
+        logger.info('Creating presigned url', todoId)
+
         const result = await this.docClient.get({
             TableName: this.todoTable,
             Key: {
@@ -32,11 +36,17 @@ export class AttachmentUtils {
         if(!result.Item) {
             throw Error('Item does not exist')
         }
+
+       
     
-        return this.s3.getSignedUrl('putObject', {
+       const presignedUrl = this.s3.getSignedUrl('putObject', {
             Bucket: this.bucketName,
             Key: todoId,
             Expires: this.uploadUrlExpiration
           })
+
+        logger.info('Presigned url created', `url: ${presignedUrl}`, todoId)
+
+        return presignedUrl
     }
 }

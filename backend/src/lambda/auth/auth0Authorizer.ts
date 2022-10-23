@@ -19,7 +19,6 @@ export const handler = async (
   event: CustomAuthorizerEvent
 ): Promise<CustomAuthorizerResult> => {
   logger.info('Authorizing a user', event.authorizationToken)
-  console.log(`Token is ${event.authorizationToken}`)
   try {
     const jwtToken = await verifyToken(event.authorizationToken)
     logger.info('User was authorized', jwtToken)
@@ -38,7 +37,6 @@ export const handler = async (
       }
     }
   } catch (e) {
-    console.log(`Not authorized ${e}`)
     logger.error('User not authorized', { error: e.message })
 
     return {
@@ -63,11 +61,7 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
     timeout: 30000
   })
   const token = getToken(authHeader)
-  console.log(`Auth header is ${authHeader}`)
-  console.log(`Verify Get token is ${token}`)
   const jwt: Jwt  = decode(token, { complete: true }) as Jwt
-  console.log(`decoded jwt is ${jwt}`)
-  console.log(`Kid is ${jwt.header.kid}`)
 
   // TODO: Implement token verification
   // You should implement it similarly to how it was implemented for the exercise for the lesson 5
@@ -78,7 +72,6 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const key = await client.getSigningKey(kid)
   const signingKey = key.getPublicKey()
   const authJwt = verify(token, signingKey,  { algorithms: ['RS256'] }) as JwtPayload
-  console.log(`Verified jwt is ${JSON.stringify(authJwt)}`)
   return authJwt
 }
 
