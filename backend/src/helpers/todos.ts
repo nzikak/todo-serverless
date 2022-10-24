@@ -22,7 +22,6 @@ export function getTodosForUser(userId: string): Promise<TodoItem[]> {
 export function createTodo(request: CreateTodoRequest, userId: string): Promise<TodoItem> {
     const itemCreatedAt = new Date().toISOString()
     const itemId = uuid.v4()
-    const bucketName = process.env.ATTACHMENT_S3_BUCKET
 
     logger.info("function createTodo", `request: ${request}`, `userId: ${userId}`)
 
@@ -33,7 +32,6 @@ export function createTodo(request: CreateTodoRequest, userId: string): Promise<
         dueDate: request.dueDate,
         done: false,
         userId: userId,
-        attachmentUrl: `https://${bucketName}.s3.amazonaws.com/${itemId}`
     }
 
     return todosAccess.createTodo(todoItem)
