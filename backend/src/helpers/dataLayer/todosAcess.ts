@@ -1,8 +1,8 @@
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
-import { createLogger } from '../utils/logger'
-import { TodoItem } from '../models/TodoItem'
-import { TodoUpdate } from '../models/TodoUpdate';
+import { createLogger } from '../../utils/logger'
+import { TodoItem } from '../../models/TodoItem'
+import { TodoUpdate } from '../../models/TodoUpdate';
 
 const AWSXRay = require('aws-xray-sdk')
 
