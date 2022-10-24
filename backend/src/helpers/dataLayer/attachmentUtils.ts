@@ -46,7 +46,7 @@ export class AttachmentUtils {
           })
         logger.info('Presigned url created', `url: ${presignedUrl}`, todoId)
 
-        this.docClient.update({
+        await this.docClient.update({
             TableName: this.todoTable,
             Key: {
                 userId: userId,
@@ -56,7 +56,7 @@ export class AttachmentUtils {
             ExpressionAttributeValues: {
                 ':attachmentUrl': `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
             }
-        })
+        }).promise()
 
         logger.info('Attachment url updated', `url: ${presignedUrl}`, todoId)
 
